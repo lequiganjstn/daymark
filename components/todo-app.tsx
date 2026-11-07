@@ -261,11 +261,6 @@ export default function TodoApp() {
                           ? "You’re all caught up"
                           : "A fresh page"}
                       </EmptyTitle>
-                      {!todoState.tasks.length && (
-                        <EmptyDescription>
-                          Add one small task to get your day moving.
-                        </EmptyDescription>
-                      )}
                     </EmptyHeader>
                   </Empty>
                 )}
@@ -294,11 +289,7 @@ export default function TodoApp() {
                     onToggle={handleToggleTask}
                     tasks={completedTasks}
                   />
-                ) : (
-                  <p className="py-2 text-sm text-muted-foreground">
-                    Finished tasks will show up here.
-                  </p>
-                )}
+                ) : null}
               </section>
             </CardContent>
           </Card>
