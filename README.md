@@ -1,5 +1,7 @@
 # Daymark
 
+<img width="1880" height="863" alt="image" src="https://github.com/user-attachments/assets/4afc6b95-edb9-4cac-90df-65ca3b92e4f9" />
+
 A lightweight to-do list that helps you build a daily completion streak.
 
 ## Features
