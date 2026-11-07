@@ -8,7 +8,6 @@ import {
   Flame,
   ListTodo,
   Plus,
-  Sparkles,
   Trash2,
 } from "lucide-react"
 
@@ -18,7 +17,6 @@ import { Button } from "@/components/ui/button"
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
@@ -148,22 +146,11 @@ export default function TodoApp() {
           </Badge>
         </header>
 
-        <section className="flex flex-col justify-between gap-6 pt-10 pb-8 sm:flex-row sm:items-end sm:pt-14">
+        <section className="pt-10 pb-8 sm:pt-14">
           <div className="max-w-2xl">
             <div className="mb-3 text-sm font-medium text-primary">
               {todayLabel ?? <Skeleton className="h-4 w-36" />}
             </div>
-            <h1 className="font-heading text-4xl font-semibold tracking-tight text-foreground sm:text-5xl">
-              Make today count.
-            </h1>
-            <p className="mt-3 max-w-xl text-base leading-7 text-muted-foreground">
-              A little progress, repeated daily, becomes something worth
-              celebrating.
-            </p>
-          </div>
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Sparkles aria-hidden="true" className="size-4 text-primary" />
-            <span>Small steps add up.</span>
           </div>
         </section>
 
@@ -178,18 +165,10 @@ export default function TodoApp() {
         <div className="grid flex-1 items-start gap-6 lg:grid-cols-[minmax(0,1fr)_20rem]">
           <Card className="min-w-0">
             <CardHeader className="flex flex-row items-start justify-between gap-4">
-              <div className="flex flex-col gap-1">
-                <CardTitle className="flex items-center gap-2 text-lg">
-                  <ListTodo
-                    aria-hidden="true"
-                    className="size-5 text-primary"
-                  />
-                  Your tasks
-                </CardTitle>
-                <CardDescription>
-                  Keep your focus on what matters today.
-                </CardDescription>
-              </div>
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <ListTodo aria-hidden="true" className="size-5 text-primary" />
+                Your tasks
+              </CardTitle>
               <Badge className="shrink-0 rounded-full" variant="outline">
                 {storageReady ? `${activeTasks.length} left` : "—"}
               </Badge>
@@ -282,11 +261,11 @@ export default function TodoApp() {
                           ? "You’re all caught up"
                           : "A fresh page"}
                       </EmptyTitle>
-                      <EmptyDescription>
-                        {todoState.tasks.length
-                          ? "Your open tasks are done. Add another when you’re ready."
-                          : "Add one small task to get your day moving."}
-                      </EmptyDescription>
+                      {!todoState.tasks.length && (
+                        <EmptyDescription>
+                          Add one small task to get your day moving.
+                        </EmptyDescription>
+                      )}
                     </EmptyHeader>
                   </Empty>
                 )}
@@ -333,9 +312,6 @@ export default function TodoApp() {
                     <Flame aria-hidden="true" className="size-5" />
                   </span>
                 </div>
-                <CardDescription>
-                  Complete at least one task each day.
-                </CardDescription>
               </CardHeader>
               <CardContent className="flex flex-col gap-5 pt-4">
                 <div className="flex items-baseline gap-2">
@@ -391,24 +367,12 @@ export default function TodoApp() {
                     </p>
                   )}
                 </div>
-                <p className="text-sm leading-6 text-muted-foreground">
-                  {!storageReady
-                    ? "Your streak will appear once your saved list is available."
-                    : currentStreak > 0
-                      ? todayKey && todoState.completionCounts[todayKey]
-                        ? "You showed up today. Keep your momentum going."
-                        : "Your streak is still alive. Complete a task today to keep it going."
-                      : "Complete one task today to start your streak."}
-                </p>
               </CardContent>
             </Card>
 
             <Card size="sm">
               <CardHeader className="pb-0">
                 <CardTitle className="text-base">Your progress</CardTitle>
-                <CardDescription>
-                  Every finished task is a step forward.
-                </CardDescription>
               </CardHeader>
               <CardContent className="flex flex-col gap-3 pt-4">
                 <div className="flex items-center justify-between text-sm">
@@ -436,20 +400,10 @@ export default function TodoApp() {
                 ) : (
                   <Skeleton className="h-2 w-full" />
                 )}
-                <p className="text-xs text-muted-foreground">
-                  {storageReady
-                    ? `${progress}% of your list is complete`
-                    : "Progress unavailable"}
-                </p>
               </CardContent>
             </Card>
           </aside>
         </div>
-
-        <footer className="flex flex-col gap-2 py-8 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
-          <span>One day at a time.</span>
-          <span>Tasks are saved in this browser.</span>
-        </footer>
       </div>
     </main>
   )
