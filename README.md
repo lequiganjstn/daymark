@@ -1,21 +1,26 @@
-# Next.js template
+# Daymark
 
-This is a Next.js template with shadcn/ui.
+A lightweight to-do list that helps you build a daily completion streak.
 
-## Adding components
+## Features
 
-To add components to your app, run the following command:
+- Add, complete, undo, and delete tasks.
+- View open and completed tasks separately.
+- Build a streak by completing at least one task on each local calendar day.
+- Save tasks and completion history in this browser's local storage.
+
+Deleting a completed task does not erase the completion history for that day. Undoing a task completion removes that completion from the streak history.
+
+## Development
 
 ```bash
-npx shadcn@latest add button
+npm run dev
 ```
 
-This will place the ui components in the `components` directory.
+Run the available checks with:
 
-## Using components
-
-To use the components in your app, import them as follows:
-
-```tsx
-import { Button } from "@/components/ui/button";
+```bash
+npm run typecheck
+npm run lint
+npm run build
 ```
