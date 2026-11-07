@@ -14,6 +14,7 @@ import {
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { StarsBackground } from "@/components/ui/background-stars"
 import {
   Card,
   CardContent,
@@ -126,8 +127,13 @@ export default function TodoApp() {
   const storageReady = storageStatus === "ready"
 
   return (
-    <main className="min-h-svh bg-muted/30">
-      <div className="mx-auto flex min-h-svh w-full max-w-6xl flex-col px-4 py-6 sm:px-8 sm:py-10">
+    <main className="relative isolate min-h-svh bg-muted/30">
+      <StarsBackground
+        aria-hidden="true"
+        className="fixed inset-0 z-0 bg-transparent"
+        starColor="var(--primary)"
+      />
+      <div className="relative z-10 mx-auto flex min-h-svh w-full max-w-6xl flex-col px-4 py-6 sm:px-8 sm:py-10">
         <header className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <span className="flex size-10 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-sm">
@@ -146,11 +152,9 @@ export default function TodoApp() {
           </Badge>
         </header>
 
-        <section className="pt-10 pb-8 sm:pt-14">
-          <div className="max-w-2xl">
-            <div className="mb-3 text-sm font-medium text-primary">
-              {todayLabel ?? <Skeleton className="h-4 w-36" />}
-            </div>
+        <section className="py-4 sm:py-5">
+          <div className="text-sm font-medium text-primary">
+            {todayLabel ?? <Skeleton className="h-4 w-36" />}
           </div>
         </section>
 
