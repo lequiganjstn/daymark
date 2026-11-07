@@ -150,9 +150,9 @@ export default function TodoApp() {
 
         <section className="flex flex-col justify-between gap-6 pt-10 pb-8 sm:flex-row sm:items-end sm:pt-14">
           <div className="max-w-2xl">
-            <p className="mb-3 text-sm font-medium text-primary">
+            <div className="mb-3 text-sm font-medium text-primary">
               {todayLabel ?? <Skeleton className="h-4 w-36" />}
-            </p>
+            </div>
             <h1 className="font-heading text-4xl font-semibold tracking-tight text-foreground sm:text-5xl">
               Make today count.
             </h1>
