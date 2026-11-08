@@ -2,6 +2,12 @@
 
 import { useMemo, useState, useSyncExternalStore } from "react"
 import {
+  AnimatePresence,
+  motion,
+  useAnimate,
+  useReducedMotion,
+} from "motion/react"
+import {
   AlertCircle,
   CalendarDays,
   Check,
@@ -67,6 +73,8 @@ export default function TodoApp() {
   )
   const [newTaskTitle, setNewTaskTitle] = useState("")
   const [taskError, setTaskError] = useState<string | null>(null)
+  const [formScope, animate] = useAnimate<HTMLFormElement>()
+  const shouldReduceMotion = useReducedMotion()
   const { state: todoState, status: storageStatus, error: storageError } = store
 
   const activeTasks = useMemo(
@@ -178,7 +186,7 @@ export default function TodoApp() {
               </Badge>
             </CardHeader>
             <CardContent className="flex flex-col gap-6">
-              <form noValidate onSubmit={handleAddTask}>
+              <form noValidate onSubmit={handleAddTask} ref={formScope}>
                 <FieldGroup className="flex-row items-start gap-2">
                   <Field
                     className="min-w-0 flex-1 gap-1"
@@ -196,6 +204,13 @@ export default function TodoApp() {
                       maxLength={160}
                       onChange={(event) => {
                         setNewTaskTitle(event.target.value)
+                        if (!shouldReduceMotion) {
+                          void animate(
+                            event.currentTarget,
+                            { scale: [1, 1.015, 1] },
+                            { duration: 0.2, ease: "easeOut" }
+                          )
+                        }
                         if (taskError) {
                           setTaskError(null)
                         }
@@ -203,9 +218,22 @@ export default function TodoApp() {
                       placeholder="What would you like to get done?"
                       value={newTaskTitle}
                     />
-                    {taskError && (
-                      <FieldError id="task-error">{taskError}</FieldError>
-                    )}
+                    <AnimatePresence initial={false}>
+                      {taskError && (
+                        <motion.div
+                          animate={{ height: "auto", opacity: 1, y: 0 }}
+                          exit={{ height: 0, opacity: 0, y: -4 }}
+                          initial={{ height: 0, opacity: 0, y: -4 }}
+                          style={{ overflow: "hidden" }}
+                          transition={{
+                            duration: shouldReduceMotion ? 0 : 0.18,
+                            ease: "easeOut",
+                          }}
+                        >
+                          <FieldError id="task-error">{taskError}</FieldError>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </Field>
                   <Button
                     aria-label="Add task"
@@ -247,26 +275,56 @@ export default function TodoApp() {
                       </EmptyDescription>
                     </EmptyHeader>
                   </Empty>
-                ) : activeTasks.length ? (
-                  <TaskList
-                    disabled={!storageReady}
-                    onDelete={handleDeleteTask}
-                    onToggle={handleToggleTask}
-                    tasks={activeTasks}
-                  />
                 ) : (
-                  <Empty className="min-h-52 border border-dashed border-border/70 bg-muted/20 p-8">
-                    <EmptyHeader>
-                      <EmptyMedia variant="icon">
-                        <Check aria-hidden="true" />
-                      </EmptyMedia>
-                      <EmptyTitle>
-                        {todoState.tasks.length
-                          ? "You’re all caught up"
-                          : "A fresh page"}
-                      </EmptyTitle>
-                    </EmptyHeader>
-                  </Empty>
+                  <AnimatePresence mode="wait">
+                    {activeTasks.length ? (
+                      <motion.div
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -4 }}
+                        initial={
+                          shouldReduceMotion ? false : { opacity: 0, y: 6 }
+                        }
+                        key="active-tasks"
+                        transition={{
+                          duration: shouldReduceMotion ? 0 : 0.18,
+                          ease: "easeOut",
+                        }}
+                      >
+                        <TaskList
+                          disabled={!storageReady}
+                          onDelete={handleDeleteTask}
+                          onToggle={handleToggleTask}
+                          tasks={activeTasks}
+                        />
+                      </motion.div>
+                    ) : (
+                      <motion.div
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -4 }}
+                        initial={
+                          shouldReduceMotion ? false : { opacity: 0, y: 6 }
+                        }
+                        key="active-empty"
+                        transition={{
+                          duration: shouldReduceMotion ? 0 : 0.18,
+                          ease: "easeOut",
+                        }}
+                      >
+                        <Empty className="min-h-52 border border-dashed border-border/70 bg-muted/20 p-8">
+                          <EmptyHeader>
+                            <EmptyMedia variant="icon">
+                              <Check aria-hidden="true" />
+                            </EmptyMedia>
+                            <EmptyTitle>
+                              {todoState.tasks.length
+                                ? "You’re all caught up"
+                                : "A fresh page"}
+                            </EmptyTitle>
+                          </EmptyHeader>
+                        </Empty>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 )}
               </section>
 
@@ -286,14 +344,31 @@ export default function TodoApp() {
                 </div>
                 {storageStatus === "loading" ? (
                   <Skeleton className="h-10 w-full" />
-                ) : storageStatus === "error" ? null : completedTasks.length ? (
-                  <TaskList
-                    disabled={!storageReady}
-                    onDelete={handleDeleteTask}
-                    onToggle={handleToggleTask}
-                    tasks={completedTasks}
-                  />
-                ) : null}
+                ) : storageStatus === "error" ? null : (
+                  <AnimatePresence>
+                    {completedTasks.length > 0 && (
+                      <motion.div
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 4 }}
+                        initial={
+                          shouldReduceMotion ? false : { opacity: 0, y: 6 }
+                        }
+                        key="completed-tasks"
+                        transition={{
+                          duration: shouldReduceMotion ? 0 : 0.18,
+                          ease: "easeOut",
+                        }}
+                      >
+                        <TaskList
+                          disabled={!storageReady}
+                          onDelete={handleDeleteTask}
+                          onToggle={handleToggleTask}
+                          tasks={completedTasks}
+                        />
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                )}
               </section>
             </CardContent>
           </Card>
@@ -310,9 +385,18 @@ export default function TodoApp() {
               </CardHeader>
               <CardContent className="flex flex-col gap-5 pt-4">
                 <div className="flex items-baseline gap-2">
-                  <span className="font-heading text-5xl font-semibold tracking-tight">
+                  <motion.span
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    className="font-heading text-5xl font-semibold tracking-tight"
+                    initial={{ opacity: 0, scale: 0.85, y: 8 }}
+                    key={currentStreak}
+                    transition={{
+                      duration: shouldReduceMotion ? 0 : 0.2,
+                      ease: "easeOut",
+                    }}
+                  >
                     {storageReady ? currentStreak : "—"}
-                  </span>
+                  </motion.span>
                   <span className="text-sm text-muted-foreground">
                     {currentStreak === 1 ? "day" : "days"}
                   </span>
@@ -335,19 +419,30 @@ export default function TodoApp() {
                           role="listitem"
                           title={`${day.longLabel}: ${hasActivity ? "activity" : "no activity"}`}
                         >
-                          <span
+                          <motion.span
+                            animate={{ opacity: 1, scale: 1 }}
                             className={`flex size-7 items-center justify-center rounded-full ${
                               hasActivity
                                 ? "bg-primary text-primary-foreground"
                                 : "bg-muted text-muted-foreground"
                             }`}
+                            initial={
+                              shouldReduceMotion
+                                ? false
+                                : { opacity: 0, scale: 0.7 }
+                            }
+                            key={hasActivity ? "activity" : "no-activity"}
+                            transition={{
+                              duration: shouldReduceMotion ? 0 : 0.2,
+                              ease: "easeOut",
+                            }}
                           >
                             {hasActivity ? (
                               <Check aria-hidden="true" className="size-3.5" />
                             ) : (
                               <span className="size-1 rounded-full bg-current" />
                             )}
-                          </span>
+                          </motion.span>
                           <span className="text-[11px] text-muted-foreground">
                             {day.shortLabel}
                           </span>
@@ -372,11 +467,20 @@ export default function TodoApp() {
               <CardContent className="flex flex-col gap-3 pt-4">
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">Tasks completed</span>
-                  <span className="font-medium text-foreground">
+                  <motion.span
+                    animate={{ opacity: 1, y: 0 }}
+                    className="font-medium text-foreground"
+                    initial={{ opacity: 0, y: 6 }}
+                    key={completedCount}
+                    transition={{
+                      duration: shouldReduceMotion ? 0 : 0.18,
+                      ease: "easeOut",
+                    }}
+                  >
                     {storageReady
                       ? `${completedCount} / ${todoState.tasks.length}`
                       : "—"}
-                  </span>
+                  </motion.span>
                 </div>
                 {storageReady ? (
                   <div
@@ -388,7 +492,7 @@ export default function TodoApp() {
                     role="progressbar"
                   >
                     <div
-                      className="h-full rounded-full bg-primary transition-[width]"
+                      className="h-full rounded-full bg-primary transition-[width] duration-500 ease-out motion-reduce:transition-none"
                       style={{ width: `${progress}%` }}
                     />
                   </div>
@@ -415,50 +519,69 @@ function TaskList({
   onToggle: (taskId: string, isComplete: boolean) => void
   onDelete: (taskId: string) => void
 }) {
+  const shouldReduceMotion = useReducedMotion()
+
   return (
     <div className="flex flex-col">
-      {tasks.map((task, index) => {
-        const checkboxId = `todo-${task.id}`
-        const isComplete = task.completedAt !== null
+      <AnimatePresence>
+        {tasks.map((task, index) => {
+          const checkboxId = `todo-${task.id}`
+          const isComplete = task.completedAt !== null
 
-        return (
-          <div key={task.id}>
-            {index > 0 && <Separator className="my-1" />}
-            <Field className="items-center gap-3 py-2" orientation="horizontal">
-              <Checkbox
-                checked={isComplete}
-                disabled={disabled}
-                id={checkboxId}
-                onCheckedChange={(checked) =>
-                  onToggle(task.id, checked === true)
-                }
-              />
-              <FieldContent className="min-w-0 flex-row items-center">
-                <FieldLabel
-                  className={`min-w-0 flex-1 cursor-pointer text-sm ${
-                    isComplete
-                      ? "text-muted-foreground line-through"
-                      : "text-foreground"
-                  }`}
-                  htmlFor={checkboxId}
+          return (
+            <motion.div
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ height: 0, opacity: 0, scale: 0.98, x: 12 }}
+              initial={
+                shouldReduceMotion
+                  ? false
+                  : { opacity: 0, scale: 0.98, y: 8 }
+              }
+              key={task.id}
+              layout
+              style={{ overflow: "hidden" }}
+              transition={{
+                duration: shouldReduceMotion ? 0 : 0.2,
+                ease: "easeOut",
+              }}
+            >
+              {index > 0 && <Separator className="my-1" />}
+              <Field className="items-center gap-3 py-2" orientation="horizontal">
+                <Checkbox
+                  checked={isComplete}
+                  disabled={disabled}
+                  id={checkboxId}
+                  onCheckedChange={(checked) =>
+                    onToggle(task.id, checked === true)
+                  }
+                />
+                <FieldContent className="min-w-0 flex-row items-center">
+                  <FieldLabel
+                    className={`min-w-0 flex-1 cursor-pointer text-sm transition-colors duration-200 active:scale-[0.99] motion-reduce:transition-none ${
+                      isComplete
+                        ? "text-muted-foreground line-through"
+                        : "text-foreground"
+                    }`}
+                    htmlFor={checkboxId}
+                  >
+                    <span className="break-words">{task.title}</span>
+                  </FieldLabel>
+                </FieldContent>
+                <Button
+                  aria-label={`Delete ${task.title}`}
+                  disabled={disabled}
+                  onClick={() => onDelete(task.id)}
+                  size="icon-sm"
+                  type="button"
+                  variant="ghost"
                 >
-                  <span className="break-words">{task.title}</span>
-                </FieldLabel>
-              </FieldContent>
-              <Button
-                aria-label={`Delete ${task.title}`}
-                disabled={disabled}
-                onClick={() => onDelete(task.id)}
-                size="icon-sm"
-                type="button"
-                variant="ghost"
-              >
-                <Trash2 aria-hidden="true" />
-              </Button>
-            </Field>
-          </div>
-        )
-      })}
+                  <Trash2 aria-hidden="true" />
+                </Button>
+              </Field>
+            </motion.div>
+          )
+        })}
+      </AnimatePresence>
     </div>
   )
 }
